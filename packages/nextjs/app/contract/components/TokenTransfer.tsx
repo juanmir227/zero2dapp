@@ -4,14 +4,20 @@ import { useState } from "react";
 import { isAddress, parseEther } from "viem";
 import {
   useAccount,
+  usePublicClient,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 import buenaTokenAbi from "../../../../../artifacts/BuenaToken.json";
+import { normalize } from "viem/ens";
+import { getEnsAddress } from "viem/actions";
+import { mainnet } from "viem/chains";
 
 const CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_BUENA_TOKEN_ADDRESS as `0x${string}`;
+
+const hasENSShape = (input: string) => input.includes(".") && input.length > 2;
 
 export function TokenTransfer() {
   const { address, isConnected } = useAccount();
@@ -20,6 +26,7 @@ export function TokenTransfer() {
   const [isMinting, setIsMinting] = useState(false);
   const [mintAmount, setMintAmount] = useState("");
   const [mintRecipient, setMintRecipient] = useState("");
+  const publicClient = usePublicClient({ chainId: mainnet.id });
 
   const {
     writeContract: transfer,
@@ -58,7 +65,27 @@ export function TokenTransfer() {
       : false;
 
   const handleTransfer = async () => {
-    if (!isAddress(recipient)) {
+    let resolvedRecipient = recipient;
+
+    if (hasENSShape(recipient) && publicClient) {
+      try {
+        const ensAddress = await getEnsAddress(publicClient, {
+          name: normalize(recipient),
+        });
+        if (ensAddress) {
+          resolvedRecipient = ensAddress;
+        } else {
+          alert("Could not resolve ENS name");
+          return;
+        }
+      } catch (error) {
+        console.error("ENS resolution error:", error);
+        alert("Error resolving ENS name");
+        return;
+      }
+    }
+
+    if (!isAddress(resolvedRecipient)) {
       alert("Please enter a valid address");
       return;
     }
@@ -73,7 +100,7 @@ export function TokenTransfer() {
         address: CONTRACT_ADDRESS,
         abi: buenaTokenAbi.abi as any,
         functionName: "transfer",
-        args: [recipient as `0x${string}`, parseEther(amount)],
+        args: [resolvedRecipient as `0x${string}`, parseEther(amount)],
       });
     } catch (error) {
       console.error("Transfer error:", error);
@@ -151,7 +178,9 @@ export function TokenTransfer() {
           <div className="space-y-4">
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Recipient Address</span>
+                <span className="label-text">
+                  Recipient Address or ENS Name
+                </span>
               </label>
               <input
                 type="text"
