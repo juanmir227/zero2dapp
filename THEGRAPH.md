@@ -1,12 +1,12 @@
 # The Graph Integration Guide - BuenoToken Workshop
 
-This guide will walk you through configuring a subgraph for the BuenoToken contract and integrating it with the Next.js application.
+This guide will walk you through deploying a subgraph to The Graph Studio and integrating it with your Next.js application.
 
 ## 🎯 Workshop Overview
 
-You have a **BuenoToken** contract deployed on Celo mainnet that uses **AccessControl** for role-based permissions. The subgraph configuration currently has Ownable events configured, but the contract actually uses AccessControl events.
+You have a **BuenoToken** contract deployed on Celo mainnet that uses **AccessControl** for role-based permissions. The subgraph configuration is already set up correctly to index the contract's events.
 
-**Your mission**: Update the subgraph to correctly index AccessControl events and implement the frontend to display the data.
+**Your mission**: Deploy the subgraph to The Graph Studio and implement the frontend to display the indexed data.
 
 ## 📝 Contract Information
 
@@ -16,13 +16,21 @@ You have a **BuenoToken** contract deployed on Celo mainnet that uses **AccessCo
 - **Block Explorer**: https://celoscan.io/address/0xCFA45ECA955dd195b5b5Fc0E40d1A1B06f16793C
 - **Start Block**: `50636395`
 
+### Events Being Indexed
+
+- `RoleGranted` - when a role is granted to an account
+- `RoleRevoked` - when a role is revoked from an account
+- `RoleAdminChanged` - when a role's admin is changed
+- `Transfer` - standard ERC20 transfer
+- `Approval` - standard ERC20 approval
+
 ## 📦 Prerequisites
 
 1. [The Graph CLI](https://github.com/graphprotocol/graph-cli) installed globally
 2. A [Subgraph Studio](https://thegraph.com/studio/) account
 3. Basic understanding of GraphQL and The Graph protocol
 
-## 📋 Part 1: Fix the Subgraph Configuration
+## 📋 Part 1: Deploy Your Subgraph
 
 ### Step 0: Install The Graph CLI
 
@@ -32,229 +40,38 @@ If you haven't already, install The Graph CLI globally:
 npm install -g @graphprotocol/graph-cli
 ```
 
-### Step 1: Analyze the Contract
+### Step 1: Review the Subgraph Configuration
 
-First, inspect the deployed contract on Celoscan:
-https://celoscan.io/address/0xCFA45ECA955dd195b5b5Fc0E40d1A1B06f16793C#code
+The subgraph is already configured in `packages/subgraph/`. Let's review what's set up:
 
-Notice that the contract uses **AccessControl**, not Ownable. It emits these events:
+**`subgraph.yaml`** - Main configuration:
 
-- `RoleGranted` - when a role is granted to an account
-- `RoleRevoked` - when a role is revoked from an account
-- `RoleAdminChanged` - when a role's admin is changed
-- `Transfer` - standard ERC20 transfer
-- `Approval` - standard ERC20 approval
+- Points to BuenoToken contract on Celo mainnet
+- Defines all AccessControl and ERC20 events to index
+- Maps events to handler functions
 
-The current subgraph configuration is set up for Ownable events, which won't work!
+**`schema.graphql`** - Data schema:
 
-### Step 2: Update subgraph.yaml
+- Defines entity types for all events
+- Each entity includes transaction and block metadata
 
-Navigate to `packages/subgraph/` and update `subgraph.yaml` to configure the correct events:
+**`src/bueno-token.ts`** - Event handlers:
 
-```yaml
-specVersion: 1.3.0
-indexerHints:
-  prune: auto
-schema:
-  file: ./schema.graphql
-dataSources:
-  - kind: ethereum
-    name: BuenoToken
-    network: celo
-    source:
-      address: "0xCFA45ECA955dd195b5b5Fc0E40d1A1B06f16793C"
-      abi: BuenoToken
-      startBlock: 50636395
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.9
-      language: wasm/assemblyscript
-      entities:
-        - Approval
-        - RoleAdminChanged
-        - RoleGranted
-        - RoleRevoked
-        - Transfer
-      abis:
-        - name: BuenoToken
-          file: ./abis/BuenoToken.json
-      eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
-          handler: handleRoleAdminChanged
-        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleGranted
-        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleRevoked
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ./src/bueno-token.ts
-```
+- Processes each event and saves it to the subgraph database
+- Transforms blockchain data into queryable entities
 
-**Key changes:**
+### Step 2: Generate TypeScript Types
 
-- Replace `EIP712DomainChanged` and `OwnershipTransferred` entities
-- Add `RoleAdminChanged`, `RoleGranted`, and `RoleRevoked` entities
-- Update event handlers to match AccessControl events
-
-### Step 3: Update Your Schema
-
-Edit `schema.graphql` to replace Ownable entities with AccessControl entities:
-
-```graphql
-type Approval @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  spender: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type RoleAdminChanged @entity(immutable: true) {
-  id: Bytes!
-  role: Bytes! # bytes32
-  previousAdminRole: Bytes! # bytes32
-  newAdminRole: Bytes! # bytes32
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type RoleGranted @entity(immutable: true) {
-  id: Bytes!
-  role: Bytes! # bytes32
-  account: Bytes! # address
-  sender: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type RoleRevoked @entity(immutable: true) {
-  id: Bytes!
-  role: Bytes! # bytes32
-  account: Bytes! # address
-  sender: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Transfer @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-```
-
-**Remove** the old `OwnershipTransferred` and `EIP712DomainChanged` types!
-
-### Step 4: Generate Code
-
-After defining your schema, generate TypeScript types:
+Navigate to the subgraph directory and generate the TypeScript types:
 
 ```bash
+cd packages/subgraph
 graph codegen
 ```
 
 This creates type definitions in `generated/` that you'll use in your mappings.
 
-### Step 5: Update Event Handlers
-
-Update `src/bueno-token.ts` with handlers for AccessControl events:
-
-```typescript
-import {
-  Approval as ApprovalEvent,
-  RoleAdminChanged as RoleAdminChangedEvent,
-  RoleGranted as RoleGrantedEvent,
-  RoleRevoked as RoleRevokedEvent,
-  Transfer as TransferEvent,
-} from "../generated/BuenoToken/BuenoToken";
-import {
-  Approval,
-  RoleAdminChanged,
-  RoleGranted,
-  RoleRevoked,
-  Transfer,
-} from "../generated/schema";
-
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  );
-  entity.owner = event.params.owner;
-  entity.spender = event.params.spender;
-  entity.value = event.params.value;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-
-export function handleRoleAdminChanged(event: RoleAdminChangedEvent): void {
-  let entity = new RoleAdminChanged(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  );
-  entity.role = event.params.role;
-  entity.previousAdminRole = event.params.previousAdminRole;
-  entity.newAdminRole = event.params.newAdminRole;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-
-export function handleRoleGranted(event: RoleGrantedEvent): void {
-  let entity = new RoleGranted(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  );
-  entity.role = event.params.role;
-  entity.account = event.params.account;
-  entity.sender = event.params.sender;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-
-export function handleRoleRevoked(event: RoleRevokedEvent): void {
-  let entity = new RoleRevoked(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  );
-  entity.role = event.params.role;
-  entity.account = event.params.account;
-  entity.sender = event.params.sender;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-
-export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  );
-  entity.from = event.params.from;
-  entity.to = event.params.to;
-  entity.value = event.params.value;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-```
-
-**Remove** the old `handleOwnershipTransferred` and `handleEIP712DomainChanged` handlers!
-
-### Step 6: Create a Subgraph in Studio
+### Step 3: Create a Subgraph in Studio
 
 1. Go to [Subgraph Studio](https://thegraph.com/studio/)
 2. Connect your wallet
@@ -262,7 +79,7 @@ export function handleTransfer(event: TransferEvent): void {
 4. Choose a name for your subgraph
 5. Copy the deploy command shown in the studio
 
-### Step 7: Authenticate with Studio
+### Step 4: Authenticate with Studio
 
 Replace `<DEPLOY_KEY>` with your deploy key from Subgraph Studio:
 
@@ -270,7 +87,7 @@ Replace `<DEPLOY_KEY>` with your deploy key from Subgraph Studio:
 graph auth --studio <DEPLOY_KEY>
 ```
 
-### Step 8: Build Your Subgraph
+### Step 5: Build Your Subgraph
 
 Compile your subgraph:
 
@@ -280,7 +97,7 @@ graph build
 
 Fix any errors that appear before proceeding.
 
-### Step 9: Deploy to Studio
+### Step 6: Deploy to Studio
 
 Replace `<SUBGRAPH_NAME>` with your subgraph's name from Studio:
 
@@ -290,7 +107,7 @@ graph deploy --studio <SUBGRAPH_NAME>
 
 You'll be prompted to choose a version label (e.g., `v0.0.1`).
 
-### Step 10: Monitor Syncing
+### Step 7: Monitor Syncing
 
 After deployment:
 
@@ -305,7 +122,7 @@ The API URL will look like:
 https://api.studio.thegraph.com/query/<ACCOUNT_ID>/<SUBGRAPH_NAME>/version/latest
 ```
 
-### Step 11: Test Your Subgraph
+### Step 8: Test Your Subgraph
 
 Use the Playground in Subgraph Studio to test queries:
 

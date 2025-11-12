@@ -84,9 +84,7 @@ export default function SubgraphPage() {
           {/* Role Granted Section */}
           <div className="card bg-base-200 shadow-xl border border-base-300">
             <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">
-                ✨ Roles Granted
-              </h2>
+              <h2 className="card-title text-3xl mb-6">✨ Roles Granted</h2>
               <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
                   <thead>
@@ -123,9 +121,7 @@ export default function SubgraphPage() {
               </div>
               {roleGranteds.length === 0 && (
                 <div className="text-center py-8 opacity-60">
-                  <p>
-                    No roles granted found. Connect a subgraph to see data.
-                  </p>
+                  <p>No roles granted found. Connect a subgraph to see data.</p>
                 </div>
               )}
             </div>
@@ -134,9 +130,7 @@ export default function SubgraphPage() {
           {/* Role Revoked Section */}
           <div className="card bg-base-200 shadow-xl border border-base-300">
             <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">
-                🚫 Roles Revoked
-              </h2>
+              <h2 className="card-title text-3xl mb-6">🚫 Roles Revoked</h2>
               <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
                   <thead>
@@ -173,9 +167,7 @@ export default function SubgraphPage() {
               </div>
               {roleRevokeds.length === 0 && (
                 <div className="text-center py-8 opacity-60">
-                  <p>
-                    No roles revoked found. Connect a subgraph to see data.
-                  </p>
+                  <p>No roles revoked found. Connect a subgraph to see data.</p>
                 </div>
               )}
             </div>
