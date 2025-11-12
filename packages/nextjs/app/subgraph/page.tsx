@@ -1,9 +1,10 @@
 export default function SubgraphPage() {
   // TODO: Fetch data from The Graph API
   const transfers: any[] = [];
-  const ownershipTransferreds: any[] = [];
+  const roleGranteds: any[] = [];
+  const roleRevokeds: any[] = [];
+  const roleAdminChangeds: any[] = [];
   const approvals: any[] = [];
-  const eip712DomainChangeds: any[] = [];
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -58,7 +59,7 @@ export default function SubgraphPage() {
                           {formatAddress(transfer.to)}
                         </td>
                         <td className="font-semibold">
-                          {(parseInt(transfer.value) / 1e18).toFixed(2)} ETH
+                          {(parseInt(transfer.value) / 100).toFixed(2)} BTK
                         </td>
                         <td>{transfer.blockNumber}</td>
                         <td className="font-mono text-sm">
@@ -80,49 +81,100 @@ export default function SubgraphPage() {
             </div>
           </div>
 
-          {/* Ownership Transferred Section */}
+          {/* Role Granted Section */}
           <div className="card bg-base-200 shadow-xl border border-base-300">
             <div className="card-body p-8">
               <h2 className="card-title text-3xl mb-6">
-                👑 Ownership Transfers
+                ✨ Roles Granted
               </h2>
               <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
                   <thead>
                     <tr>
-                      <th>Previous Owner</th>
-                      <th>New Owner</th>
+                      <th>Role</th>
+                      <th>Account</th>
+                      <th>Sender</th>
                       <th>Block</th>
                       <th>Transaction</th>
                       <th>Timestamp</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {ownershipTransferreds.map((transfer) => (
-                      <tr key={transfer.id}>
+                    {roleGranteds.map((event) => (
+                      <tr key={event.id}>
+                        <td className="font-mono text-sm">{event.role}</td>
                         <td className="font-mono text-sm">
-                          {formatAddress(transfer.previousOwner)}
+                          {formatAddress(event.account)}
                         </td>
                         <td className="font-mono text-sm">
-                          {formatAddress(transfer.newOwner)}
+                          {formatAddress(event.sender)}
                         </td>
-                        <td>{transfer.blockNumber}</td>
+                        <td>{event.blockNumber}</td>
                         <td className="font-mono text-sm">
-                          {formatAddress(transfer.transactionHash)}
+                          {formatAddress(event.transactionHash)}
                         </td>
                         <td className="text-sm opacity-70">
-                          {formatTimestamp(transfer.blockTimestamp)}
+                          {formatTimestamp(event.blockTimestamp)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {ownershipTransferreds.length === 0 && (
+              {roleGranteds.length === 0 && (
                 <div className="text-center py-8 opacity-60">
                   <p>
-                    No ownership transfers found. Connect a subgraph to see
-                    data.
+                    No roles granted found. Connect a subgraph to see data.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Role Revoked Section */}
+          <div className="card bg-base-200 shadow-xl border border-base-300">
+            <div className="card-body p-8">
+              <h2 className="card-title text-3xl mb-6">
+                🚫 Roles Revoked
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="table table-zebra w-full">
+                  <thead>
+                    <tr>
+                      <th>Role</th>
+                      <th>Account</th>
+                      <th>Sender</th>
+                      <th>Block</th>
+                      <th>Transaction</th>
+                      <th>Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {roleRevokeds.map((event) => (
+                      <tr key={event.id}>
+                        <td className="font-mono text-sm">{event.role}</td>
+                        <td className="font-mono text-sm">
+                          {formatAddress(event.account)}
+                        </td>
+                        <td className="font-mono text-sm">
+                          {formatAddress(event.sender)}
+                        </td>
+                        <td>{event.blockNumber}</td>
+                        <td className="font-mono text-sm">
+                          {formatAddress(event.transactionHash)}
+                        </td>
+                        <td className="text-sm opacity-70">
+                          {formatTimestamp(event.blockTimestamp)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {roleRevokeds.length === 0 && (
+                <div className="text-center py-8 opacity-60">
+                  <p>
+                    No roles revoked found. Connect a subgraph to see data.
                   </p>
                 </div>
               )}
@@ -153,7 +205,7 @@ export default function SubgraphPage() {
                           {formatAddress(approval.spender)}
                         </td>
                         <td className="font-semibold">
-                          {(parseInt(approval.value) / 1e18).toFixed(2)} ETH
+                          {(parseInt(approval.value) / 100).toFixed(2)} BTK
                         </td>
                         <td className="font-mono text-sm">
                           {formatAddress(approval.transactionHash)}
@@ -171,26 +223,34 @@ export default function SubgraphPage() {
             </div>
           </div>
 
-          {/* EIP712 Domain Changed Section */}
+          {/* Role Admin Changed Section */}
           <div className="card bg-base-200 shadow-xl border border-base-300">
             <div className="card-body p-8">
               <h2 className="card-title text-3xl mb-6">
-                🔐 EIP712 Domain Changes
+                🔐 Role Admin Changes
               </h2>
               <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Role</th>
+                      <th>Previous Admin</th>
+                      <th>New Admin</th>
                       <th>Block</th>
                       <th>Transaction</th>
                       <th>Timestamp</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {eip712DomainChangeds.map((event) => (
+                    {roleAdminChangeds.map((event) => (
                       <tr key={event.id}>
-                        <td className="font-mono text-sm">{event.id}</td>
+                        <td className="font-mono text-sm">{event.role}</td>
+                        <td className="font-mono text-sm">
+                          {event.previousAdminRole}
+                        </td>
+                        <td className="font-mono text-sm">
+                          {event.newAdminRole}
+                        </td>
                         <td>{event.blockNumber}</td>
                         <td className="font-mono text-sm">
                           {formatAddress(event.transactionHash)}
@@ -203,10 +263,10 @@ export default function SubgraphPage() {
                   </tbody>
                 </table>
               </div>
-              {eip712DomainChangeds.length === 0 && (
+              {roleAdminChangeds.length === 0 && (
                 <div className="text-center py-8 opacity-60">
                   <p>
-                    No domain changes found. Connect a subgraph to see data.
+                    No role admin changes found. Connect a subgraph to see data.
                   </p>
                 </div>
               )}
