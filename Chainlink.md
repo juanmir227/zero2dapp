@@ -26,7 +26,8 @@ BuenoTokenShop
 
 - Your wallet will be on CELO mainnet
 - Connect Remix to your wallet
-- Deploy BuenoTokenShop
+- Deploy BuenoTokenShop on Remix
+    - [BuenoTokenShop.sol](https://remix.ethereum.org/#url=https://github.com/ryestew/zero2dapp/blob/chainlink/contracts/BuenoTokenShop.sol)
     - The parameter is the Bueno Token Address
 - On Bueno Token, allow BuenoTokenShop to mint Bueno Token
     - execute grantRole
