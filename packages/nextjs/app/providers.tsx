@@ -11,6 +11,7 @@ import {
   arbitrum,
   base,
   sepolia,
+  celoSepolia as celoSepoliaTestnet,
   celo as celoMainnet,
 } from "wagmi/chains";
 import {
@@ -25,53 +26,11 @@ const celo = {
   iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
 };
 
-// Define Celo Alfajores testnet
-const celoAlfajores = defineChain({
-  id: 44787,
-  name: "Celo Alfajores Testnet",
-  nativeCurrency: {
-    name: "CELO",
-    symbol: "CELO",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://alfajores-forno.celo-testnet.org"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Blockscout",
-      url: "https://celo-alfajores.blockscout.com",
-    },
-  },
+// Override Celo mainnet with icon
+const celoSepolia = {
+  ...celoSepoliaTestnet,
   iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
-  testnet: true,
-});
-
-// Define Celo Sepolia testnet
-const celoSepolia = defineChain({
-  id: 11142220,
-  name: "Celo Sepolia Testnet",
-  nativeCurrency: {
-    name: "CELO",
-    symbol: "CELO",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://forno.celo-sepolia.celo-testnet.org"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Blockscout",
-      url: "https://celo-sepolia.blockscout.com",
-    },
-  },
-  iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
-  testnet: true,
-});
+};
 
 const wagmiConfig = getDefaultConfig({
   appName: "ZeroToDapp",
@@ -85,7 +44,6 @@ const wagmiConfig = getDefaultConfig({
     arbitrum,
     base,
     celo,
-    celoAlfajores,
     celoSepolia,
   ],
   ssr: true,
