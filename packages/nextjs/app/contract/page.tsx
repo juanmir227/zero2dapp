@@ -38,7 +38,7 @@ export default function ContractPage() {
                     {CONTRACT_ADDRESS}
                   </div>
                   <a
-                    href={`https://celo-sepolia.blockscout.com/address/${CONTRACT_ADDRESS}`}
+                    href={`https://celo.blockscout.com/address/${CONTRACT_ADDRESS}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="link link-primary text-sm mt-2 inline-block"

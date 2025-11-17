@@ -24,7 +24,7 @@ import { deploy } from "./ethers-lib";
     console.log(`✅ BuenoToken deployed successfully!`);
     console.log(`📝 Contract Address: ${result.address}`);
     console.log(
-      `🔗 Explorer: https://celo-sepolia.blockscout.com/address/${result.address}`
+      `🔗 Explorer: https://celo.blockscout.com/address/${result.address}`
     );
     console.log(`\n⚠️  Don't forget to:`);
     console.log(

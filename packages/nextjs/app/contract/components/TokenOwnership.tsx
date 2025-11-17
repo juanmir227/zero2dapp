@@ -261,7 +261,7 @@ function TokenBalanceRow({
       <td className="font-bold">#{rank}</td>
       <td className="font-mono text-sm">
         <a
-          href={`https://celo-sepolia.blockscout.com/address/${balance.address}`}
+          href={`https://celo.blockscout.com/address/${balance.address}`}
           target="_blank"
           rel="noopener noreferrer"
           className="link link-primary"

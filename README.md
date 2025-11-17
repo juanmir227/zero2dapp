@@ -59,20 +59,18 @@ See the [subgraph README](./packages/subgraph/README.md) for detailed instructio
 
 Your smart contracts are located in the `contracts/` directory. Use the scripts in the `scripts/` directory to deploy them.
 
-#### Deploying to Celo Sepolia
+#### Deploying to Celo Mainnet
 
-To deploy BuenoToken to Celo Sepolia testnet:
+To deploy BuenoToken to Celo Mainnet:
 
-1. **Get Testnet Tokens**
+1. **Get Celo Tokens**
 
-   - Visit the [Celo Sepolia Faucet](https://faucet.celo.org/) or [Alchemy Celo Sepolia Faucet](https://sepoliafaucet.com/)
-   - Connect your wallet and request testnet CELO tokens
-   - You'll need tokens to pay for gas fees
+  Get your CELO tokens at [FaucetDrops](https://faucetdrops.io/faucet/0xb34D25c41df27D62e49f975b0E854d642c5F246E?networkId=42220). Get the code during the workshop! 
 
 2. **Deploy Using Remix**
 
    - Open [Remix IDE](https://remix.ethereum.org/)
-   - Connect your wallet (MetaMask) to Celo Sepolia testnet
+   - Connect your wallet (MetaMask) to Celo Mainnet
    - Upload and compile `contracts/BuenoToken.sol`
    - Run `scripts/deploy_with_ethers.ts` in Remix
    - Copy the deployed contract address

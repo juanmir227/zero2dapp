@@ -6,12 +6,12 @@ Complete guide for deploying BuenoToken on Celo Sepolia and integrating Celo bra
 
 - [Overview](#overview)
 - [What Was Changed](#what-was-changed)
-- [Getting Celo Sepolia Testnet Tokens](#getting-celo-sepolia-testnet-tokens)
+- [Getting CELO Tokens](#getting-celo-tokens)
 - [Deploying BuenoToken Contract](#deploying-buenotoken-contract)
 - [Environment Variables Setup](#environment-variables-setup)
 - [Frontend Contract Interaction](#frontend-contract-interaction)
 - [Celo Branding Implementation](#celo-branding-implementation)
-- [Celo Sepolia Network Details](#celo-sepolia-network-details)
+- [Celo Mainnet Details](#celo-network-details)
 - [Troubleshooting](#troubleshooting)
 - [Resources](#resources)
 
@@ -58,34 +58,16 @@ This integration adds:
 3. **Documentation**
    - `README.md` - Added Celo Sepolia deployment instructions
 
-## 🚰 Getting Celo Sepolia Testnet Tokens
+## 🚰 Getting CELO Tokens
 
-Before deploying your contract, you'll need CELO tokens on Celo Sepolia testnet to pay for gas fees.
+Before deploying your contract, you'll need CELO tokens on Celo Mainnet testnet to pay for gas fees.
 
-### Option 1: Official Celo Faucet
+### Faucet Drops
 
-1. Visit the [Celo Faucet](https://faucet.celo.org/)
-2. Select **Celo Sepolia** from the network dropdown
-3. Enter your wallet address
-4. Complete any required verification (CAPTCHA, etc.)
-5. Request testnet tokens
-6. Wait for confirmation (usually takes a few minutes)
+Get your CELO tokens at [FaucetDrops](https://faucetdrops.io/faucet/0xb34D25c41df27D62e49f975b0E854d642c5F246E?networkId=42220). Get the code during the workshop! 
 
-### Option 2: Alchemy Sepolia Faucet
 
-1. Visit [Alchemy Sepolia Faucet](https://sepoliafaucet.com/)
-2. Select **Celo Sepolia** network
-3. Enter your wallet address
-4. Request tokens
-
-### Option 3: Chainlink Faucet
-
-1. Visit [Chainlink Faucet](https://faucets.chain.link/)
-2. Select **Celo Sepolia**
-3. Connect your wallet or enter your address
-4. Request testnet tokens
-
-### Adding Celo Sepolia to MetaMask
+### Adding Celo to MetaMask
 
 If you haven't added Celo Sepolia to MetaMask yet:
 
@@ -95,11 +77,11 @@ If you haven't added Celo Sepolia to MetaMask yet:
 4. Enter the following details:
 
 ```
-Network Name: Celo Sepolia
-RPC URL: https://forno.celo-sepolia.celo-testnet.org
-Chain ID: 11142220
+Network Name: Celo Mainnet
+RPC URL: https://forno.celo.celo-testnet.org
+Chain ID: 42220
 Currency Symbol: CELO
-Block Explorer: https://celo-sepolia.blockscout.com
+Block Explorer: https://celo.blockscout.com
 ```
 
 ## 🚀 Deploying BuenoToken Contract
@@ -174,7 +156,7 @@ import { deploy } from "./ethers-lib";
     console.log(`✅ BuenoToken deployed successfully!`);
     console.log(`📝 Contract Address: ${result.address}`);
     console.log(
-      `🔗 Explorer: https://celo-sepolia.blockscout.com/address/${result.address}`
+      `🔗 Explorer: https://celo.blockscout.com/address/${result.address}`
     );
     console.log(`\n⚠️  Don't forget to:`);
     console.log(
@@ -284,7 +266,7 @@ export default function ContractPage() {
                     {CONTRACT_ADDRESS}
                   </div>
                   <a
-                    href={`https://celo-sepolia.blockscout.com/address/${CONTRACT_ADDRESS}`}
+                    href={`https://celo.blockscout.com/address/${CONTRACT_ADDRESS}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="link link-primary text-sm mt-2 inline-block"
@@ -818,20 +800,20 @@ Added Contract navigation link:
 
 - **Network Name**: Celo Sepolia Testnet
 - **Chain ID**: `11142220`
-- **RPC URL**: `https://forno.celo-sepolia.celo-testnet.org`
-- **Block Explorer**: [Blockscout](https://celo-sepolia.blockscout.com/)
+- **RPC URL**: `https://forno.celo.org`
+- **Block Explorer**: [Blockscout](https://celo.blockscout.com/)
 - **Native Currency**: CELO
 - **Currency Symbol**: CELO
 - **Decimals**: 18
 
 ### RPC Endpoints
 
-- Primary: `https://forno.celo-sepolia.celo-testnet.org`
-- Alternative: `https://celo-sepolia.infura.io/v3/YOUR_INFURA_KEY`
+- Primary: `https://forno.celo.org`
+- Alternative: Find a list of all [RPC providers](https://docs.celo.org/tooling/nodes/overview) on Celo here.
 
 ### Block Explorer
 
-- [Blockscout](https://celo-sepolia.blockscout.com/)
+- [Blockscout](https://celo.blockscout.com/)
 - Use it to view transactions, contract addresses, and account balances
 
 ## 🔍 Troubleshooting
@@ -906,7 +888,7 @@ Added Contract navigation link:
 
 - [Celo Documentation](https://docs.celo.org/)
 - [Celo Sepolia Network Info](https://docs.celo.org/developer-resources/faucet)
-- [Celo Block Explorer](https://celo-sepolia.blockscout.com/)
+- [Celo Block Explorer](https://celo.blockscout.com/)
 - [Remix IDE](https://remix.ethereum.org/)
 - [MetaMask Documentation](https://docs.metamask.io/)
 - [The Graph Documentation](https://thegraph.com/docs/)
@@ -949,7 +931,7 @@ After deploying and setting up:
 
    ```json
    {
-     "celo-sepolia": {
+     "celo": {
        "BuenoToken": {
          "address": "0xYourContractAddress",
          "startBlock": 12345678
