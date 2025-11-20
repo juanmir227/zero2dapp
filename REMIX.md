@@ -86,17 +86,7 @@ Visit [remix.ethereum.org](https://remix.ethereum.org/) in your browser.
 4. Verify that the connected account is displayed below the environment dropdown
 5. Verify that "Celo (42220)" is shown as the network
 
-### Step 6: Set Constructor Parameters
-
-1. Find the contract dropdown (should say "BuenoToken")
-2. Below it, you'll see a field for constructor parameters
-3. Enter your wallet address (the address that will own the contract)
-   - This address will have special permissions
-   - Copy your address from MetaMask
-   - Paste it in the constructor field
-   - Make sure it starts with `0x` and is 42 characters long
-
-### Step 7: Deploy Contract
+### Step 6: Deploy Contract
 
 1. Click the orange **"Deploy"** button
 2. MetaMask will pop up asking you to confirm the transaction
@@ -106,14 +96,23 @@ Visit [remix.ethereum.org](https://remix.ethereum.org/) in your browser.
 4. Click **"Confirm"** in MetaMask
 5. Wait for the transaction to be mined (usually 5-15 seconds)
 
-### Step 8: Verify Deployment
+### Step 7: Verify Deployment
 
 1. Once deployed, you'll see the contract under "Deployed Contracts" section
 2. Click the dropdown arrow to see all contract functions
 3. Copy the contract address (displayed next to the contract name)
 4. Click the copy icon to copy the address
 
-### Step 9: Verify on Block Explorer
+### Step 8a: Verify with the Contract Verification Plugin 
+Try either Step 8a or 8b
+
+1. Go to the plugin manager and activate the Contract Verification plugin.
+2. Choose Celo as the chain 
+3. Paste in you contract's address
+4. Go to the settings tab of this plugin and in the blockscout section, paste in https://celo.blockscout.com
+5. Go back to the main tab of the plugin and click **Verify**
+
+### Step 8b: Verify on Block Explorer
 
 1. Go to [Celo Blockscout](https://celo.blockscout.com/)
 2. Paste your contract address in the search bar
@@ -125,6 +124,7 @@ Visit [remix.ethereum.org](https://remix.ethereum.org/) in your browser.
    - Balance (should be 0)
 
 ### Step 10: Save Contract Address
+1. Pin your contract's address and copy the address as well.
 
 **Important:** Save your contract address! You'll need it for:
 
@@ -147,7 +147,6 @@ Use this checklist to verify successful deployment:
 
 - [ ] Contract compiled without errors
 - [ ] MetaMask connected to Celo Mainnet
-- [ ] Constructor parameter (owner address) entered correctly
 - [ ] Deployment transaction confirmed in MetaMask
 - [ ] Contract address copied and saved
 - [ ] Contract visible on Celo Blockscout
