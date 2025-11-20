@@ -263,7 +263,527 @@ Set darkTheme to "celo-dark" to specify which theme to use for dark mode. Set ba
 Export this config as the default export. This configuration creates a bold, high-contrast design system that emphasizes architectural typography with GT Alpina headlines and Inter body text, uses Celo's brand colors throughout, and provides both light and dark themes following Celo's brand guidelines. All components will have hard edges (no rounded corners), visible structure through borders, and stark color blocks. The design feels engineered and intentional with poster-like screens where color, type, and negative space are the primary interface elements.
 ```
 
-## Resources
+## 💻 Code Integration Guide
+
+Complete code examples for the contract interaction pages in the `/contract` folder:
+
+### 1. Contract Page (`packages/nextjs/app/contract/page.tsx`)
+
+Main page that displays the contract address and renders the balance and transfer components:
+
+```typescript
+import { TokenBalance } from "./components/TokenBalance";
+import { TokenTransfer } from "./components/TokenTransfer";
+
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_BUENO_TOKEN_ADDRESS;
+
+export default function ContractPage() {
+  return (
+    <div className="min-h-screen bg-celo-lt-tan">
+      {/* Hero Section - Big Color Block */}
+      <section className="bg-celo-yellow border-b-4 border-celo-black">
+        <div className="container mx-auto px-8 py-24 max-w-7xl">
+          <div className="flex flex-col items-start max-w-4xl">
+            <h1 className="font-alpina text-h2 md:text-h1 text-celo-black mb-6">
+              BuenoToken <span className="italic">Contract</span>
+            </h1>
+            <p className="font-inter text-body-l text-celo-black mb-12 max-w-2xl">
+              Interact with your BuenoToken contract on Celo Mainnet
+            </p>
+            {CONTRACT_ADDRESS && (
+              <div className="bg-celo-forest-green border-2 border-celo-black p-8 w-full">
+                <p className="font-inter text-label uppercase text-celo-white mb-4">
+                  CONTRACT ADDRESS
+                </p>
+                <p className="font-mono text-body-m text-celo-white break-all mb-4">
+                    {CONTRACT_ADDRESS}
+                </p>
+                  <a
+                    href={`https://celo.blockscout.com/address/${CONTRACT_ADDRESS}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  className="inline-block bg-celo-yellow text-celo-black font-inter font-bold text-body-m px-6 py-3 border-2 border-celo-black hover:bg-celo-black hover:text-celo-yellow transition-all"
+                  >
+                  VIEW ON BLOCKSCOUT →
+                  </a>
+              </div>
+            )}
+            {!CONTRACT_ADDRESS && (
+              <div className="bg-celo-orange border-2 border-celo-black p-8 w-full">
+                <p className="font-inter font-bold text-body-m text-celo-black mb-2">
+                  Contract not configured
+                </p>
+                <p className="font-inter text-body-s text-celo-black">
+                  Please set NEXT_PUBLIC_BUENO_TOKEN_ADDRESS in your .env.local file
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Content Section - Asymmetric Grid */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-8 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+            {/* Token Balance */}
+            <div className="flex flex-col">
+              <TokenBalance />
+            </div>
+
+            {/* Token Transfer */}
+            <div className="flex flex-col">
+              <TokenTransfer />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+```
+
+**Key Features:**
+- Yellow hero section with GT Alpina typography
+- Forest green contract address card with Blockscout link
+- Two-column grid layout for balance and transfer components
+- Hard-edged design with Celo brand colors
+
+### 2. Token Balance Component (`packages/nextjs/app/contract/components/TokenBalance.tsx`)
+
+Displays the connected wallet's token balance with Celo brand styling:
+
+```typescript
+"use client";
+
+import { formatEther } from "viem";
+import { useAccount, useReadContract } from "wagmi";
+import buenoTokenAbi from "../../../../../artifacts/BuenoToken.json";
+
+const CONTRACT_ADDRESS = process.env
+  .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
+
+export function TokenBalance() {
+  const { address, isConnected } = useAccount();
+
+  const { data: balance, isLoading } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: buenoTokenAbi.abi as any,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: isConnected && !!address,
+    },
+  });
+
+  const { data: tokenName } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: buenoTokenAbi.abi as any,
+    functionName: "name",
+  });
+
+  const { data: tokenSymbol } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: buenoTokenAbi.abi as any,
+    functionName: "symbol",
+  });
+
+  if (!isConnected) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="card bg-celo-dk-tan border-2 border-celo-outline flex-1 flex flex-col">
+          <div className="card-body p-8 flex flex-col justify-between">
+            <h3 className="font-inter text-2xl font-bold tracking-tight mb-6">
+              TOKEN BALANCE
+            </h3>
+            <div className="alert alert-info p-6">
+              <span className="font-inter text-body-m">
+                Please connect your wallet to view your token balance
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="card bg-celo-dk-tan border-2 border-celo-outline flex-1 flex flex-col">
+        <div className="card-body p-8 flex flex-col justify-between">
+          <h3 className="font-inter text-2xl font-bold tracking-tight mb-6">
+            TOKEN BALANCE
+          </h3>
+        {isLoading ? (
+            <div className="flex justify-center items-center py-16">
+              <span className="loading loading-spinner loading-lg text-celo-purple"></span>
+          </div>
+        ) : (
+            <div className="flex flex-col space-y-8">
+              {/* Large Balance Display */}
+              <div className="bg-celo-yellow border-2 border-celo-black p-8">
+                <div className="flex flex-col">
+                  <p className="font-inter text-label uppercase mb-2">
+                {(tokenName as string) || "BuenoToken"}
+                  </p>
+                  <p className="font-alpina text-6xl text-celo-black leading-tight">
+                {balance
+                  ? parseFloat(formatEther(balance as bigint)).toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 4,
+                      }
+                    )
+                  : "0.00"}
+                  </p>
+                  <p className="font-inter text-body-m mt-2">
+                {(tokenSymbol as string) || "BTK"}
+                  </p>
+              </div>
+            </div>
+
+              {/* Address Display */}
+              <div className="bg-celo-lt-tan border-2 border-celo-outline p-6">
+                <p className="font-inter text-label uppercase mb-2">YOUR ADDRESS</p>
+                <p className="font-mono text-body-s text-celo-body-copy break-all">
+                  {address}
+                </p>
+            </div>
+          </div>
+        )}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+**Key Features:**
+- Reads token balance, name, and symbol from contract using wagmi hooks
+- Large yellow balance display with GT Alpina typography
+- Address display with monospace font
+- Loading spinner with Celo purple color
+- Hard-edged cards with 2px borders
+
+### 3. Token Transfer Component (`packages/nextjs/app/contract/components/TokenTransfer.tsx`)
+
+Allows users to transfer tokens (includes owner-only mint functionality):
+
+```typescript
+"use client";
+
+import { useState } from "react";
+import { isAddress, parseEther } from "viem";
+import {
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import buenoTokenAbi from "../../../../../artifacts/BuenoToken.json";
+
+const CONTRACT_ADDRESS = process.env
+  .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
+
+export function TokenTransfer() {
+  const { address, isConnected } = useAccount();
+  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState("");
+  const [mintAmount, setMintAmount] = useState("");
+  const [mintRecipient, setMintRecipient] = useState("");
+
+  const {
+    writeContract: transfer,
+    data: transferHash,
+    isPending: isTransferPending,
+    error: transferError,
+  } = useWriteContract();
+
+  const {
+    writeContract: mint,
+    data: mintHash,
+    isPending: isMintPending,
+    error: mintError,
+  } = useWriteContract();
+
+  const { isLoading: isTransferConfirming, isSuccess: isTransferSuccess } =
+    useWaitForTransactionReceipt({
+      hash: transferHash,
+    });
+
+  const { isLoading: isMintConfirming, isSuccess: isMintSuccess } =
+    useWaitForTransactionReceipt({
+      hash: mintHash,
+    });
+
+  const { data: owner } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: buenoTokenAbi.abi as any,
+    functionName: "owner",
+  });
+
+  const isOwner =
+    owner && address
+      ? (owner as string).toLowerCase() === address.toLowerCase()
+      : false;
+
+  const handleTransfer = async () => {
+    if (!isAddress(recipient)) {
+      alert("Please enter a valid address");
+      return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      transfer({
+        address: CONTRACT_ADDRESS,
+        abi: buenoTokenAbi.abi as any,
+        functionName: "transfer",
+        args: [recipient as `0x${string}`, parseEther(amount)],
+      });
+    } catch (error) {
+      console.error("Transfer error:", error);
+    }
+  };
+
+  const handleMint = async () => {
+    if (!isAddress(mintRecipient)) {
+      alert("Please enter a valid address");
+      return;
+    }
+
+    if (!mintAmount || parseFloat(mintAmount) <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      mint({
+        address: CONTRACT_ADDRESS,
+        abi: buenoTokenAbi.abi as any,
+        functionName: "mint",
+        args: [mintRecipient as `0x${string}`, parseEther(mintAmount)],
+      });
+    } catch (error) {
+      console.error("Mint error:", error);
+    }
+  };
+
+  const resetForm = () => {
+    setRecipient("");
+    setAmount("");
+    setMintAmount("");
+    setMintRecipient("");
+  };
+
+  if (isTransferSuccess || isMintSuccess) {
+    setTimeout(() => {
+      resetForm();
+    }, 3000);
+  }
+
+  if (!isConnected) {
+  return (
+      <div className="flex flex-col h-full">
+        <div className="card bg-celo-dk-tan border-2 border-celo-outline flex-1 flex flex-col">
+          <div className="card-body p-8 flex flex-col justify-between">
+            <h3 className="font-inter text-2xl font-bold tracking-tight mb-6">
+              TRANSFER TOKENS
+            </h3>
+            <div className="alert alert-info p-6">
+              <span className="font-inter text-body-m">
+                Please connect your wallet to transfer tokens
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full space-y-8">
+      {/* Transfer Tokens */}
+      <div className="card bg-celo-dk-tan border-2 border-celo-outline flex-1">
+        <div className="card-body p-8">
+          <h3 className="font-inter text-2xl font-bold tracking-tight mb-8">
+            TRANSFER TOKENS
+          </h3>
+          <div className="flex flex-col space-y-6">
+            <div className="form-control">
+              <label className="label pb-2">
+                <span className="label-text font-inter text-label uppercase">
+                  Recipient Address
+                </span>
+              </label>
+              <input
+                type="text"
+                placeholder="0x..."
+                className="input border-2 border-celo-outline bg-celo-lt-tan w-full font-mono text-body-m p-4"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                disabled={isTransferPending || isTransferConfirming}
+              />
+            </div>
+            <div className="form-control">
+              <label className="label pb-2">
+                <span className="label-text font-inter text-label uppercase">
+                  Amount
+                </span>
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                placeholder="0.0"
+                className="input border-2 border-celo-outline bg-celo-lt-tan w-full text-body-m p-4"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={isTransferPending || isTransferConfirming}
+              />
+            </div>
+            {(isTransferPending || isTransferConfirming) && (
+              <div className="alert alert-info p-6">
+                <span className="loading loading-spinner loading-sm"></span>
+                <span className="font-inter text-body-m">
+                  {isTransferConfirming
+                    ? "Waiting for confirmation..."
+                    : "Transaction submitted..."}
+                </span>
+              </div>
+            )}
+            {isTransferSuccess && (
+              <div className="alert alert-success p-6">
+                <span className="font-inter text-body-m font-bold">
+                  Transfer successful!
+                </span>
+              </div>
+            )}
+            {transferError && (
+              <div className="alert alert-error p-6">
+                <span className="font-inter text-body-s">
+                  Error: {transferError.message}
+                </span>
+              </div>
+            )}
+            <button
+              className="btn btn-primary w-full py-4 mt-4"
+              onClick={handleTransfer}
+              disabled={
+                isTransferPending ||
+                isTransferConfirming ||
+                !recipient ||
+                !amount
+              }
+            >
+              SEND TOKENS
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mint Tokens (Owner Only) */}
+      {isOwner && (
+        <div className="card bg-celo-purple border-2 border-celo-black">
+          <div className="card-body p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-inter text-2xl font-bold tracking-tight text-celo-white">
+                MINT TOKENS
+              </h3>
+              <span className="badge bg-celo-orange border-2 border-celo-black text-celo-black font-inter text-label px-4 py-2">
+                OWNER ONLY
+              </span>
+            </div>
+            <div className="flex flex-col space-y-6">
+              <div className="form-control">
+                <label className="label pb-2">
+                  <span className="label-text font-inter text-label uppercase text-celo-white">
+                    Recipient Address
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="0x..."
+                  className="input border-2 border-celo-outline bg-celo-lt-tan w-full font-mono text-body-m p-4"
+                  value={mintRecipient}
+                  onChange={(e) => setMintRecipient(e.target.value)}
+                  disabled={isMintPending || isMintConfirming}
+                />
+              </div>
+              <div className="form-control">
+                <label className="label pb-2">
+                  <span className="label-text font-inter text-label uppercase text-celo-white">
+                    Amount
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="0.0"
+                  className="input border-2 border-celo-outline bg-celo-lt-tan w-full text-body-m p-4"
+                  value={mintAmount}
+                  onChange={(e) => setMintAmount(e.target.value)}
+                  disabled={isMintPending || isMintConfirming}
+                />
+              </div>
+              {(isMintPending || isMintConfirming) && (
+                <div className="alert alert-info p-6">
+                  <span className="loading loading-spinner loading-sm"></span>
+                  <span className="font-inter text-body-m">
+                    {isMintConfirming
+                      ? "Waiting for confirmation..."
+                      : "Transaction submitted..."}
+                  </span>
+                </div>
+              )}
+              {isMintSuccess && (
+                <div className="alert alert-success p-6">
+                  <span className="font-inter text-body-m font-bold">
+                    Mint successful!
+                  </span>
+                </div>
+              )}
+              {mintError && (
+                <div className="alert alert-error p-6">
+                  <span className="font-inter text-body-s">
+                    Error: {mintError.message}
+                  </span>
+                </div>
+              )}
+              <button
+                className="btn bg-celo-yellow hover:bg-celo-white text-celo-black border-2 border-celo-yellow w-full py-4 mt-4"
+                onClick={handleMint}
+                disabled={
+                  isMintPending ||
+                  isMintConfirming ||
+                  !mintRecipient ||
+                  !mintAmount
+                }
+              >
+                MINT TOKENS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+**Key Features:**
+- Transfer form with address and amount validation
+- Transaction state tracking (pending, confirming, success, error)
+- Auto-reset form after 3 seconds on success
+- Owner-only mint section with purple background
+- Hard-edged inputs and buttons with Celo brand colors
+- Color inversion on button hover (yellow ↔ black)
+
+## 📚 Resources
 
 - [Celo Documentation](https://docs.celo.org/)
 - [Celo Mainnet Network Info](https://docs.celo.org/network)
